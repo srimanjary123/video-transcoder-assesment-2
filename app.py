@@ -208,11 +208,26 @@ def ddb_put_item_nnnn(item: dict):
         logger.exception("DynamoDB PutItem failed: %s", e)
         raise RuntimeError(f"DynamoDB PutItem failed: {e.response}")
 
-def ddb_get(job_id: str) -> Dict:
-    res = ddb.get_item(Key={"job_id": job_id})
+def ddb_get_mmm(job_id: str) -> Dict:
+    res = ddb.get_item(Key={"qut-username": job_id})
     if "Item" not in res:
         raise HTTPException(status_code=404, detail="Job not found")
     return res["Item"]
+
+def ddb_get(job_id: str) -> Dict:
+    try:
+        session = get_boto_session()
+        ddb = session.resource("dynamodb")
+        table = ddb.Table(os.getenv("DDB_TABLE_NAME"))
+        res = table.get_item(Key={"qut-username": job_id})
+        print(f"My job id is {job_id}")
+        if "Item" not in res:
+            raise HTTPException(status_code=404, detail="Job not found")
+        return res["Item"]
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"ddb_get failed: {str(e)}")
 
 def ddb_update(job_id: str, **attrs):
     if not attrs:
@@ -669,7 +684,7 @@ def api_upload(file: UploadFile, user=Depends(require_jwt)):
 
     return {"video_id": job_id, "s3_key": upload_key}
 
-@app.post("/api/v1/transcode")
+@app.post("/api/v1/transcode_bkp")
 def api_transcode(body: dict, bg: BackgroundTasks, user=Depends(require_jwt)):
     job_id = body.get("video_id")
     resolution = body.get("resolution", "480p")
@@ -678,6 +693,107 @@ def api_transcode(body: dict, bg: BackgroundTasks, user=Depends(require_jwt)):
         raise HTTPException(status_code=403, detail="Forbidden")
     bg.add_task(transcode_task, job_id, item.get("upload_key"), resolution)
     return {"job_id": job_id}
+
+def validate_jwt(token: str) -> dict:
+    """
+    Validate a Cognito JWT access or ID token and return decoded claims.
+    Raises HTTPException(401) on failure.
+    """
+    try:
+        # Fetch signing key from JWKS
+        signing_key = _jwk_client.get_signing_key_from_jwt(token).key
+
+        # Decode and validate the token
+        payload = jwt.decode(
+            token,
+            signing_key,
+            algorithms=["RS256"],
+            audience=COGNITO_CLIENT_ID,  # or remove this line if not verifying audience
+            issuer=ISSUER,
+        )
+
+        return payload  # contains sub, email, exp, etc.
+
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError as e:
+        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"JWT validation error: {str(e)}")
+
+
+def parse_auth_sub(authorization: str) -> str:
+    """Return 'sub' from a Bearer token, or '' on failure / missing."""
+    if not authorization:
+        return ""
+    try:
+        scheme, _, token = authorization.partition(" ")
+        if token:
+            payload = validate_jwt(token)    # your existing validator
+            return payload.get("sub", "") or ""
+    except Exception as e:
+        logger.warning("parse_auth_sub: JWT parsing failed: %s", e)
+    return ""
+
+COGNITO_REGION = os.getenv("COGNITO_REGION")
+COGNITO_USER_POOL_ID = os.getenv("COGNITO_USER_POOL_ID")
+COGNITO_CLIENT_ID = os.getenv("COGNITO_CLIENT_ID")
+
+JWKS_URL = f"https://cognito-idp.{COGNITO_REGION}.amazonaws.com/{COGNITO_USER_POOL_ID}/.well-known/jwks.json"
+ISSUER = f"https://cognito-idp.{COGNITO_REGION}.amazonaws.com/{COGNITO_USER_POOL_ID}"
+
+_jwk_client = PyJWKClient(JWKS_URL)
+
+@app.post("/api/v1/transcode")
+def api_transcode(body: dict, bg: BackgroundTasks, authorization: str = Header(None)):
+    job_id = body.get("video_id")
+    if not job_id:
+        raise HTTPException(status_code=400, detail="missing video_id")
+
+    item = ddb_get(job_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="job not found")
+
+    stored_sub = item.get("user_sub", "") or ""
+    requester_sub = parse_auth_sub(authorization)   # empty if no token or invalid
+    logger.info("transcode requested job=%s stored_sub=%r requester_sub=%r", job_id, stored_sub, requester_sub)
+
+    if stored_sub:
+        if not requester_sub:
+            logger.warning("transcode denied: job %s owned by %s but no token supplied", job_id, stored_sub)
+            raise HTTPException(status_code=403, detail="Forbidden")
+        if stored_sub != requester_sub:
+            logger.warning("transcode denied: token sub %s does not match owner %s for job %s",
+                           requester_sub, stored_sub, job_id)
+            raise HTTPException(status_code=403, detail="Forbidden")
+
+    resolution = body.get("resolution", "480p")
+    bg.add_task(transcode_task, job_id, item.get("upload_key"), resolution)
+    return {"job_id": job_id}
+
+
+@app.get("/api/v1/status_public/{job_id}")
+def api_status_public(job_id: str):
+    """
+    Public status endpoint used by the frontend when showing immediate progress in the table.
+    This returns only minimal fields so we can poll without auth.
+    """
+    try:
+        item = ddb_get(job_id)   # ddb_get already uses the correct table/key logic
+        return {
+            "job_id": job_id,
+            "status": item.get("status", ""),
+            "preview_gif": item.get("preview_gif", False),
+            # optional: include a lightweight progress hint (if you later add progress %)
+            "progress": item.get("progress")  # may be None
+        }
+    except HTTPException:
+        # propagate 404
+        raise
+    except Exception as e:
+        logger.exception("status_public error for %s: %s", job_id, e)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
 
 @app.get("/api/v1/status/{job_id}")
 def api_status(job_id: str, user=Depends(require_jwt)):
