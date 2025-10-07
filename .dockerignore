@@ -1,0 +1,9 @@
+_pycache_
+.venv
+.env
+outputs
+*.mp4
+*.mkv
+.git
+.gitignore
+node_modules
