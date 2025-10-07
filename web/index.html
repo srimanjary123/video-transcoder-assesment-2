@@ -1,0 +1,1048 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Video Transcoder</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root {
+      --bg: #155b74;
+      --card: #ffffff;
+      --ink: #0b1320;
+      --muted: #6b778c;
+      --brand: #3a82f7;
+      --brand-2: #2c6fe3;
+      --ok: #2e7d32;
+      --warn: #d19a00;
+      --bad: #c62828;
+      --chip: #0b1320;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, Segoe UI, Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: #fff
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px
+    }
+
+    h1.title {
+      margin: 12px 0 24px;
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: .5px;
+      text-align: center
+    }
+
+    /* ---------- Auth card ---------- */
+    .auth-shell {
+      display: flex;
+      justify-content: center;
+      margin-top: 8px
+    }
+
+    .card {
+      width: min(420px, 90vw);
+      background: var(--card);
+      color: var(--ink);
+      border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, .18);
+      padding: 22px 20px 18px;
+    }
+
+    .card h2 {
+      margin: 4px 0 14px;
+      font-size: 28px;
+      text-align: center
+    }
+
+    .field {
+      margin: 10px 0
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #d0d4dc;
+      background: #fff;
+      color: #222;
+      outline: none;
+      font-size: 15px
+    }
+
+    .row-between {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 6px 0 12px
+    }
+
+    .link {
+      color: var(--brand);
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid #d0d4dc;
+      background: #e9eef7;
+      color: #223;
+      font-weight: 700;
+      cursor: pointer
+    }
+
+    .btn.primary {
+      background: var(--brand);
+      color: #fff;
+      border-color: var(--brand-2)
+    }
+
+    .btn.full {
+      width: 100%;
+      text-align: center
+    }
+
+    .btn.small {
+      padding: 9px 14px
+    }
+
+    .helper {
+      margin-top: 10px;
+      text-align: center;
+      color: #54627a;
+      font-size: 14px
+    }
+
+    .quick {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      justify-content: center
+    }
+
+    .err {
+      color: var(--bad);
+      font-weight: 700;
+      margin-top: 8px;
+      text-align: center;
+      min-height: 20px
+    }
+
+    .okmsg {
+      color: var(--ok);
+      font-weight: 700;
+      margin-top: 8px;
+      text-align: center;
+      min-height: 20px
+    }
+
+    /* ---------- App area ---------- */
+    .app {
+      display: none
+    }
+
+    .bar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin: 12px 0 18px
+    }
+
+    .who {
+      font-weight: 700;
+      opacity: .9
+    }
+
+    .auth-badge {
+      font-size: 14px;
+      opacity: .8
+    }
+
+    .chip {
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: 1px solid #d0d4dc;
+      background: #fff;
+      color: #223;
+      font-weight: 800;
+      cursor: pointer
+    }
+
+    .chip.active {
+      background: var(--brand);
+      color: #fff;
+      border-color: var(--brand-2)
+    }
+
+    .chip .tag {
+      font-size: 12px;
+      font-weight: 800;
+      margin-left: 8px;
+      opacity: .9
+    }
+
+    .group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center
+    }
+
+    .row {
+      margin: 16px 0
+    }
+
+    .uploader {
+      background: #f5f9ff;
+      border: 2px dashed #d6dfea;
+      border-radius: 12px;
+      padding: 26px;
+      text-align: center;
+      color: #667
+    }
+
+    .uploader input {
+      display: block;
+      margin: 10px auto
+    }
+
+    #uploadBox {
+      white-space: pre-wrap;
+      background: #0b1320;
+      color: #e8f0ff;
+      border-radius: 12px;
+      padding: 12px;
+      overflow: auto
+    }
+
+    h2.section {
+      margin: 26px 0 10px;
+      text-align: center
+    }
+
+    .cards {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      max-width: 820px;
+      margin: 0 auto
+    }
+
+    .card2 {
+      background: #fff;
+      color: #0b1320;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+      padding: 16px
+    }
+
+    .label {
+      display: inline-block;
+      background: var(--chip);
+      color: #fff;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-weight: 800
+    }
+
+    .sub {
+      display: inline-block;
+      margin-left: 10px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 1px solid #d0d4dc;
+      font-weight: 800
+    }
+
+    .status {
+      margin-top: 10px;
+      font-weight: 800
+    }
+
+    .status.ok {
+      color: var(--ok)
+    }
+
+    .status.proc {
+      color: var(--warn)
+    }
+
+    .status.fail {
+      color: var(--bad)
+    }
+
+    video {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-top: 10px
+    }
+
+    .download-btn {
+      margin-top: 10px;
+      display: inline-block;
+      padding: 8px 12px;
+      background: var(--brand);
+      color: #fff;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600
+    }
+
+    /* History */
+    .history {
+      max-width: 920px;
+      margin: 0 auto
+    }
+
+    .hist-row {
+      display: grid;
+      grid-template-columns: 140px 1fr 120px 120px 110px;
+      gap: 8px;
+      align-items: center;
+      background: #ffffff;
+      color: #0b1320;
+      padding: 10px;
+      border-radius: 10px;
+      margin: 8px 0
+    }
+
+    .hist-head {
+      font-weight: 800;
+      opacity: .8;
+      background: #eef3fb
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 8px;
+      border: 1px solid #d0d4dc;
+      font-weight: 700
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <h1 class="title">Video Transcoder</h1>
+
+    <!-- ========== AUTH ========== -->
+    <div id="authArea" class="auth-shell">
+      <div class="card" id="authCard">
+        <h2 id="authTitle">Login</h2>
+
+        <!-- Login -->
+        <div id="loginForm">
+          <div class="field"><input id="loginEmail" placeholder="Username (e.g. alice)" /></div>
+          <div class="field"><input id="loginPass" type="password" placeholder="Password" /></div>
+          <div class="row-between">
+            <span></span><a class="link" id="goSignup">Signup</a>
+          </div>
+          <button class="btn primary full" id="loginBtn">Login</button>
+
+          <div class="helper">Quick demo:</div>
+          <div class="quick">
+            <button class="btn small" id="qaAlice">Alice (admin)</button>
+            <button class="btn small" id="qaBob">Bob (user)</button>
+          </div>
+          <div class="err" id="authErr"></div>
+        </div>
+
+        <!-- Signup -->
+        <div id="signupForm" style="display:none">
+          <div class="field"><input id="suUser" placeholder="Choose a username" /></div>
+          <div class="field"><input id="suPass" type="password" placeholder="Create password" /></div>
+          <div class="field">
+            <select id="suRole">
+              <option value="user" selected>User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <button class="btn primary full" id="signupBtn">Create account</button>
+          <div class="helper">Already have an account? <a class="link" id="goLogin">Login</a></div>
+          <div class="err" id="suErr"></div>
+          <div class="okmsg" id="suOk"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== APP ========== -->
+    <div id="appArea" class="app">
+      <div class="bar">
+        <div class="who">Logged in as <span id="whoUser"></span> <span class="auth-badge" id="whoRole"></span></div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <label id="keepWrap" style="display:none"><input id="keepHistory" type="checkbox" checked /> Keep history
+            (admin)</label>
+          <button class="btn small" id="logoutBtn">Logout</button>
+        </div>
+      </div>
+
+      <!-- Upload -->
+      <div class="row">
+        <div class="uploader">
+          <div>Drag & drop or choose a file to upload</div>
+          <input type="file" id="file" />
+          <button class="btn small" id="uploadBtn">Upload</button>
+        </div>
+        <pre id="uploadBox"></pre>
+      </div>
+
+      <!-- Options (no ALL button) -->
+      <div class="row group" id="resPicker">
+        <button class="chip" data-res="1080p">1080p <span class="tag">FULLHD</span></button>
+        <button class="chip" data-res="720p">720p <span class="tag">HD</span></button>
+        <button class="chip" data-res="480p">480p <span class="tag">SD</span></button>
+
+        <label style="display:flex;align-items:center;gap:8px">
+          <input id="pgif" type="checkbox" /> Preview GIF
+        </label>
+
+        <button class="btn primary small" id="goBtn">Transcode</button>
+      </div>
+
+      <input id="vid" style="display:none" />
+
+      <h2 class="section" style="display: none;">Current Output</h2>
+      <div id="cards" class="cards" style="display: none;"></div>
+
+      <!---current table user-->
+      <div>
+        <label>Page size:
+          <select id="limit">
+            <option>10</option>
+            <option selected>25</option>
+            <option>50</option>
+          </select>
+        </label>
+        <button id="refresh">Refresh</button>
+      </div>
+
+      <div id="msg"></div>
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th>qut-username</th>
+            <th>jobId</th>
+            <th>status</th>
+            <th>Verified</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <div class="pager">
+        <button id="prev" disabled>Prev</button>
+        <button id="next" disabled>Next</button>
+        <span id="pageInfo"></span>
+      </div>
+      <style>
+        /* ==== CARD WRAPPER ==== */
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    padding: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* ==== CONTROLS ==== */
+  .controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  select, button {
+    padding: 8px 14px;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    background-color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  button:hover {
+    background: #0066ff;
+    color: #fff;
+    border-color: #0053d1;
+  }
+
+  #msg {
+    text-align: center;
+    font-style: italic;
+    color: #555;
+    margin: 10px 0;
+  }
+
+  /* ==== TABLE ==== */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    overflow: hidden;
+    border-radius: 8px;
+  }
+
+  th, td {
+    padding: 12px 15px;
+    text-align: left;
+  }
+
+  thead {
+    background: #0066ff;
+    color: #fff;
+  }
+
+  tbody tr:nth-child(even) {
+    background: #f5f8fc;
+  }
+
+  tbody tr:hover {
+    background: #eaf2ff;
+    transition: background 0.2s ease;
+  }
+
+  td {
+    border-bottom: 1px solid #e1e4e8;
+  }
+
+  /* ==== PAGINATION ==== */
+  .pager {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .pager button {
+    padding: 8px 16px;
+    border-radius: 6px;
+  }
+
+  .pager button:disabled {
+    background: #e1e4e8;
+    color: #888;
+    cursor: not-allowed;
+  }
+
+  #pageInfo {
+    font-size: 14px;
+    color: #555;
+  }
+
+  /* Responsive for smaller devices */
+  @media (max-width: 700px) {
+    table, thead, tbody, th, td, tr {
+      display: block;
+    }
+
+    thead {
+      display: none;
+    }
+
+    tr {
+      margin-bottom: 10px;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    td {
+      border: none;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    td::before {
+      content: attr(data-label);
+      font-weight: bold;
+      color: #333;
+    }
+  }
+      </style>
+      <script>
+        const api = "/api/v1/users";
+        let stack = []; // store previous next_keys for prev
+        let currentNext = null;
+
+        async function fetchPage(nextKey) {
+          const limit = document.getElementById('limit').value;
+          let url = `${api}?limit=${limit}`;
+          if (nextKey) url += `&start_key=${encodeURIComponent(nextKey)}`;
+
+          document.getElementById('msg').textContent = "Loading...";
+          const res = await fetch(url, { credentials: 'include' }); // include cookies if session auth
+          if (!res.ok) {
+            const txt = await res.text();
+            document.getElementById('msg').textContent = "Error: " + txt;
+            return;
+          }
+          const j = await res.json();
+          renderTable(j.items || []);
+          // manage pagination stack
+          const prevBtn = document.getElementById('prev');
+          const nextBtn = document.getElementById('next');
+
+          // push currentNext onto stack to enable Prev
+          if (nextKey !== undefined) {
+            // if user clicked Next, we previously pushed currentNext. otherwise noop.
+          }
+
+          // If client requested a page using start_key, enable Prev
+          if (nextKey) {
+            prevBtn.disabled = false;
+          } else {
+            prevBtn.disabled = stack.length === 0;
+          }
+
+          if (j.next_key) {
+            nextBtn.disabled = false;
+            // store the current token before moving forward (for Prev)
+            document._lastReturnedKey = j.next_key;
+          } else {
+            nextBtn.disabled = true;
+          }
+
+          currentNext = j.next_key || null;
+          document.getElementById('msg').textContent = "";
+          document.getElementById('pageInfo').textContent =
+            `Items: ${j.items.length}  ${currentNext ? ' (more...)' : ''}`;
+        }
+
+        function renderTable(items) {
+          const tbody = document.querySelector('#tbl tbody');
+          tbody.innerHTML = '';
+          for (const it of items) {
+            const tr = document.createElement('tr');
+            const username = it['qut-username'] || it['qut-username '] || '';
+            const jobid = it['jobId'] || it['jobid'] || it['jobId'.toLowerCase()] || it['job_id'] || '';
+            const status = it['status'] || '';
+            const verified = it['Verified'] !== undefined ? String(it['Verified']) : (it['verified'] || '');
+            tr.innerHTML = `<td>${escapeHtml(username)}</td>
+                    <td>${escapeHtml(jobid)}</td>
+                    <td>${escapeHtml(status)}</td>
+                    <td>${escapeHtml(verified)}</td>`;
+            tbody.appendChild(tr);
+          }
+        }
+
+        function escapeHtml(s) {
+          if (!s && s !== 0) return '';
+          return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        // Prev/Next handlers: simple stack approach
+        document.getElementById('next').addEventListener('click', async () => {
+          if (!currentNext) return;
+          // push marker for prev
+          stack.push(currentNext);
+          await fetchPage(currentNext);
+        });
+        document.getElementById('prev').addEventListener('click', async () => {
+          // pop last token (we stored tokens when moving forward)
+          if (stack.length === 0) return;
+          stack.pop(); // current page token at top removed
+          const prevKey = stack.length ? stack[stack.length - 1] : null;
+          await fetchPage(prevKey);
+        });
+        document.getElementById('refresh').addEventListener('click', () => { stack = []; fetchPage(null); });
+
+        // initial load
+        fetchPage(null);
+      </script>
+
+      <div id="adminHistory" style="display:none">
+        <h2 class="section">All Jobs (Admin)</h2>
+        <div class="history">
+          <div class="hist-row hist-head">
+            <div>When</div>
+            <div>Owner / File</div>
+            <div>Resolution</div>
+            <div>Status</div>
+            <div>Actions</div>
+          </div>
+          <div id="histBody"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ------- mini utils ------- */
+    const $ = (id) => document.getElementById(id);
+    const setText = (el, v) => el.textContent = typeof v === 'string' ? v : JSON.stringify(v, null, 2);
+    const fmtTime = (unix) => new Date(unix * 1000).toLocaleString();
+
+    /* ------- state ------- */
+    let currentUser = null;
+    let currentRole = null;
+    let selectedRes = null; // "1080p" | "720p" | "480p"
+    const pretty = { "1080p": "FULLHD", "720p": "HD", "480p": "SD" };
+    const cards = {}; // res -> ui helpers
+    let histTimer = null;
+
+    /* ------- auth UI ------- */
+    function showLogin() {
+      $('authTitle').textContent = 'Login';
+      $('loginForm').style.display = '';
+      $('signupForm').style.display = 'none';
+      $('authErr').textContent = '';
+    }
+    function showSignup() {
+      $('authTitle').textContent = 'Signup';
+      $('loginForm').style.display = 'none';
+      $('signupForm').style.display = '';
+      $('suErr').textContent = '';
+      $('suOk').textContent = '';
+    }
+    $('goSignup').addEventListener('click', showSignup);
+    $('goLogin').addEventListener('click', showLogin);
+
+    /* quick demo buttons */
+    $('qaAlice').addEventListener('click', () => doLogin('alice', 'password1'));
+    $('qaBob').addEventListener('click', () => doLogin('bob', 'password2'));
+
+    /* typed login */
+    $('loginBtn').addEventListener('click', () => {
+      debugger
+      const u = $('loginEmail').value.trim().toLowerCase();
+      const p = $('loginPass').value;
+      if (!u || !p) { $('authErr').textContent = 'Enter username and password'; return; }
+      doLogin(u, p);
+    });
+
+    async function doLogin(username, password) {
+      // helper to access elements (safe)
+      debugger
+      const $safe = (id) => document.getElementById(id) || null;
+
+      const authErrEl = $safe('authErr');
+      const whoUserEl = $safe('whoUser');
+      const whoRoleEl = $safe('whoRole');
+      const authArea = $safe('authArea');
+      const appArea = $safe('appArea');
+      const keepWrap = $safe('keepWrap');
+      const adminHistory = $safe('adminHistory');
+
+      if (!authErrEl) {
+        console.error("Element with id 'authErr' not found. Make sure $ or element exists.");
+        // still continue, but create a fallback in-memory element
+      } else {
+        authErrEl.textContent = '';
+      }
+
+      if (!username || !password) {
+        if (authErrEl) authErrEl.textContent = 'Username and password required';
+        return;
+      }
+
+      try {
+        console.log("Sending login request for", username);
+        const r = await fetch('/api/v1/login1', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ username, password })
+        });
+
+        console.log("Received response:", r.status, r.statusText);
+
+        // Try JSON first, fallback to raw text
+        let body;
+        const contentType = r.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          body = await r.json().catch((err) => {
+            console.warn("Failed to parse JSON:", err);
+            return null;
+          });
+        } else {
+          body = await r.text().catch((err) => {
+            console.warn("Failed to read response text:", err);
+            return null;
+          });
+        }
+
+        // If not ok show details (JSON 'detail' preferred, else raw body, else status)
+        if (!r.ok) {
+          console.warn("Login failed response body:", body);
+          const message = (body && (body.detail || body.message || JSON.stringify(body)));
+          if (authErrEl) authErrEl.textContent = message;
+          else console.error("Auth error:", message);
+          return;
+        }
+
+        // success path
+        if (!body) {
+          if (authErrEl) authErrEl.textContent = 'Login succeeded but server returned no JSON body';
+          console.error("Empty JSON body on success");
+          return;
+        }
+
+        const j = body;
+        currentUser = username;
+        currentRole = j.role || 'user';
+
+        if (whoUserEl) whoUserEl.textContent = currentUser;
+        if (whoRoleEl) whoRoleEl.textContent = '(' + currentRole + ')';
+        if (authArea) authArea.style.display = 'none';
+        if (appArea) appArea.style.display = 'block';
+        if (keepWrap) keepWrap.style.display = currentRole === 'admin' ? '' : 'none';
+        if (adminHistory) adminHistory.style.display = currentRole === 'admin' ? '' : 'none';
+
+        clearUIForNewSession();
+        startHistoryPolling();
+
+      } catch (err) {
+        // differentiate network error and others
+        console.error("Network or JS error during login:", err);
+        if (authErrEl) authErrEl.textContent = err?.message || 'Network error';
+      }
+    }
+
+    async function doLogin1(username, password) {
+      debugger
+      $('authErr').textContent = '';
+      try {
+        const r = await fetch('/api/v1/login', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+          body: JSON.stringify({ username, password })
+        });
+        if (!r.ok) {
+          const j = await r.json().catch(() => ({}));
+          $('authErr').textContent = j.detail || 'Wrong credentials';
+          return;
+        }
+        const j = await r.json();
+        currentUser = username; currentRole = j.role || 'user';
+        $('whoUser').textContent = currentUser;
+        $('whoRole').textContent = '(' + currentRole + ')';
+        $('authArea').style.display = 'none';
+        $('appArea').style.display = 'block';
+        $('keepWrap').style.display = currentRole === 'admin' ? '' : 'none';
+        $('adminHistory').style.display = currentRole === 'admin' ? '' : 'none';
+        clearUIForNewSession();
+        startHistoryPolling();
+      } catch { $('authErr').textContent = 'Network error'; }
+    }
+
+    /* signup */
+    $('signupBtn').addEventListener('click', async () => {
+      debugger
+      const u = $('suUser').value.trim().toLowerCase();
+      const p = $('suPass').value;
+      const role = $('suRole').value;
+      if (!u || !p) { $('suErr').textContent = 'Please enter all fields'; $('suOk').textContent = ''; return; }
+      $('suErr').textContent = '';
+      try {
+        const r = await fetch('/api/v1/signup1', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: u, password: p, role })
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) { $('suErr').textContent = j.detail || 'Could not sign up'; $('suOk').textContent = ''; return; }
+        $('suOk').textContent = 'Account created! Please log in.';
+        // Switch back to login and prefill username
+        setTimeout(() => {
+          showLogin();
+          $('loginEmail').value = u;
+          $('loginPass').focus();
+        }, 800);
+      } catch { $('suErr').textContent = 'Network error'; $('suOk').textContent = ''; }
+    });
+
+    /* logout */
+    $('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/v1/logout', { method: 'POST', credentials: 'include' });
+      currentUser = null; currentRole = null;
+      $('appArea').style.display = 'none';
+      $('authArea').style.display = 'flex';
+      clearInterval(histTimer); histTimer = null;
+      showLogin();
+    });
+
+    /* ------- upload ------- */
+    $('uploadBtn').addEventListener('click', upload);
+    async function upload() {
+      const f = $('file').files[0];
+      if (!f) { alert('Choose a file'); return; }
+      const fd = new FormData(); fd.append('file', f);
+      const r = await fetch('/api/v1/upload', { method: 'POST', body: fd, credentials: 'include' });
+      const j = await r.json().catch(() => ({}));
+      setText($('uploadBox'), j);
+      if (j.video_id) $('vid').value = j.video_id;
+    }
+
+    /* ------- transcode selector ------- */
+    document.querySelectorAll('#resPicker .chip').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('#resPicker .chip').forEach(b => b.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        selectedRes = e.currentTarget.dataset.res;
+      });
+    });
+
+    /* ------- job card helpers ------- */
+    function clearUIForNewSession() {
+      $('uploadBox').textContent = '';
+      $('vid').value = '';
+      $('cards').innerHTML = '';
+      $('histBody').innerHTML = '';
+    }
+
+    function ensureCard(res) {
+      const key = res || 'current';
+      if (cards[key]) return cards[key];
+      const root = document.createElement('div');
+      root.className = 'card2';
+      root.innerHTML = `
+    <div><span class="label">${res ? res.toUpperCase() : 'OUTPUT'}</span><span class="sub">${pretty[res] || ''}</span></div>
+    <div class="status proc">Queued…</div>
+    <div class="media"></div>
+  `;
+      $('cards').appendChild(root);
+      const statusEl = root.querySelector('.status');
+      const mediaEl = root.querySelector('.media');
+      const api = {
+        setQueued() { statusEl.textContent = 'Queued…'; statusEl.className = 'status proc'; },
+        setProcessing() { statusEl.textContent = 'Processing…'; statusEl.className = 'status proc'; },
+        setDone() { statusEl.textContent = 'Done'; statusEl.className = 'status ok'; },
+        setFail(msg = 'Failed to queue') { statusEl.textContent = msg; statusEl.className = 'status fail'; },
+        mediaEl, root
+      };
+      cards[key] = api; return api;
+    }
+
+    /* ------- queue job ------- */
+    async function queueOne(video_id, res, replace_old, previewGif = false) {
+      const card = ensureCard(res);
+      card.setQueued();
+      try {
+        const r = await fetch('/api/v1/transcode', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+          body: JSON.stringify({ video_id, resolution: res, replace_old, watermark_text: null, preview_gif: previewGif })
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || !j.job_id) { card.setFail(j.detail || 'Failed to queue'); return; }
+        card.setProcessing();
+
+        const poll = setInterval(async () => {
+          try {
+            const s = await fetch(`/api/v1/status/${j.job_id}`, { credentials: 'include' });
+            const sj = await s.json().catch(() => ({}));
+            if (sj.status === 'completed') {
+              clearInterval(poll);
+              card.setDone();
+              card.mediaEl.innerHTML = '';
+              const v = document.createElement('video');
+              v.controls = true; v.src = `/api/v1/download/${j.job_id}`;
+              card.mediaEl.appendChild(v);
+              const dl = document.createElement('a');
+              dl.href = `/api/v1/download/${j.job_id}`;
+              dl.download = `${res || 'output'}.mp4`;
+              dl.className = 'download-btn';
+              dl.textContent = 'Download';
+              card.mediaEl.appendChild(dl);
+              if (sj.preview_gif) {
+                const img = document.createElement('img');
+                img.src = `/api/v1/preview/${j.job_id}.gif`;
+                img.style.maxWidth = '100%';
+                img.style.display = 'block';
+                img.style.marginTop = '10px';
+                card.mediaEl.appendChild(img);
+              }
+              // refresh history once job is complete
+              loadHistoryOnce();
+            } else if (sj.status === 'failed') {
+              clearInterval(poll);
+              card.setFail('Failed');
+            }
+          } catch {/* ignore transient errors */ }
+        }, 2000);
+      } catch {
+        card.setFail('Network error');
+      }
+    }
+
+    /* Transcode button */
+    $('goBtn').addEventListener('click', async () => {
+      const video_id = $('vid').value.trim();
+      if (!video_id) { alert('Upload a video first'); return; }
+      if (!selectedRes) { alert('Choose a resolution'); return; }
+      const previewGif = $('pgif').checked;
+      // Users: replace_old = true; Admins: use checkbox
+      const replace_old = currentRole === 'admin' ? !$('keepHistory').checked ? true : false : true;
+      queueOne(video_id, selectedRes, replace_old, previewGif);
+    });
+
+    /* ------- history (admin) ------- */
+    async function fetchJobs() {
+      const qs = new URLSearchParams(); // admin sees all by default
+      const r = await fetch('/api/v1/jobs?' + qs.toString(), { credentials: 'include' });
+      if (!r.ok) return [];
+      const j = await r.json().catch(() => ({ items: [] }));
+      return j.items || [];
+    }
+
+    function renderHistory(items) {
+      const body = $('histBody');
+      body.innerHTML = '';
+      items.forEach(j => {
+        const row = document.createElement('div');
+        row.className = 'hist-row';
+        const when = fmtTime(j.completed_at || j.created_at || Math.floor(Date.now() / 1000));
+        const owner = j.owner || '-';
+        const file = j.video_id || '-';
+        const status = j.status || 'unknown';
+        const canDL = status === 'completed';
+        row.innerHTML = `
+      <div>${when}</div>
+      <div><span class="pill">${owner}</span> &nbsp; <span>${file}</span></div>
+      <div><span class="pill">${j.resolution || '-'}</span></div>
+      <div>${status}</div>
+      <div>${canDL ? `<a class="btn small" href="/api/v1/download/${j.job_id}" download>Download</a>` : ''}</div>
+    `;
+        body.appendChild(row);
+      });
+    }
+
+    async function loadHistoryOnce() {
+      if (currentRole !== 'admin') return;
+      const items = await fetchJobs();
+      renderHistory(items);
+    }
+
+    function startHistoryPolling() {
+      clearInterval(histTimer);
+      if (currentRole !== 'admin') return;
+      // initial load
+      loadHistoryOnce();
+      // refresh every 10s
+      histTimer = setInterval(loadHistoryOnce, 10000);
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,50 @@
+{
+  "alice": {
+    "password_hash": "387fe501e2423943d34806627ee225752356abfb050426e81ad178e7712290ff",
+    "role": "admin"
+  },
+  "bob": {
+    "password_hash": "5edd3e338687bdaaa0bb2524a7976d81073bcce2c9c488bce6811d17954031aa",
+    "role": "user"
+  },
+  "hi": {
+    "password_hash": "a38880787ea09bbc004e711639c2914ceab227a01943db8b75b921a1a721a30e",
+    "role": "user"
+  },
+  "88": {
+    "password_hash": "883b3c0eec2b2c1f5157cd31f756b0fc4a05513df26bafbc019ad0461e543fb8",
+    "role": "admin"
+  },
+  "1": {
+    "password_hash": "e9eb84466e9a102335ca9ca0f8d16661b080f20a3b0438f9e401a16d8e6afde5",
+    "role": "user"
+  },
+  "3": {
+    "password_hash": "c102da0261ec95c46d203b566c63325f7d4db1c0149f237ef5e4c4e19534b5f0",
+    "role": "user"
+  },
+  "hello1": {
+    "password_hash": "f8009a4fc5c598fbbaee53435f6c6d327a085a821c5274c21c159144aa2f0ede",
+    "role": "admin"
+  },
+  "hello12": {
+    "password_hash": "5cc53b272cb24d433334db597d745eff53357d412c67c534e84d3085da492528",
+    "role": "user"
+  },
+  "7": {
+    "password_hash": "8569f17a45d40ece8801c84c45750acf3c04c51f2d12f34b6bdc8d6a3113030a",
+    "role": "user"
+  },
+  "5": {
+    "password_hash": "2925a8dae7b67f97aed0fe228fd02cb455b36fcaabfdc123b6f77f8b37364719",
+    "role": "admin"
+  },
+  "9": {
+    "password_hash": "cf171a71f87d7698696523e5bcd1991bb83b2c3a22fc8bbd5a6668a3ec3087e0",
+    "role": "user"
+  },
+  "10": {
+    "password_hash": "0eaaf4132049f2b08d4ee032f5fdf3bc91561894c8f630aad99005f982fd9b11",
+    "role": "admin"
+  }
+}
