@@ -1,0 +1,64 @@
+{
+    "Version": "1.0",
+    "ServiceEstimates": [
+        {
+            "ServiceName": "Amazon EC2",
+            "UsageDescription": "Compute instances for API backend and media processing workers",
+            "MonthlyHours": 720,
+            "InstanceType": "t3.medium",
+            "Quantity": 3,
+            "CostPerMonthUSD": 95.4
+        },
+        {
+            "ServiceName": "AWS Lambda",
+            "UsageDescription": "Serverless video transcoding trigger functions",
+            "InvocationsPerMonth": 200000,
+            "GBSeconds": 500000,
+            "CostPerMonthUSD": 7.5
+        },
+        {
+            "ServiceName": "Amazon S3",
+            "UsageDescription": "Storage for raw, transcoded, and output video files",
+            "StorageGB": 500,
+            "Requests": 100000,
+            "CostPerMonthUSD": 12.0
+        },
+        {
+            "ServiceName": "Amazon RDS (MySQL)",
+            "UsageDescription": "Database for metadata and job tracking",
+            "InstanceType": "db.t3.medium",
+            "StorageGB": 50,
+            "CostPerMonthUSD": 60.0
+        },
+        {
+            "ServiceName": "Amazon CloudFront",
+            "UsageDescription": "Global CDN for delivering transcoded videos",
+            "DataTransferGB": 500,
+            "Requests": 50000,
+            "CostPerMonthUSD": 15.0
+        },
+        {
+            "ServiceName": "Amazon ECS",
+            "UsageDescription": "Container orchestration for scaling transcoding microservices",
+            "Tasks": 5,
+            "CostPerMonthUSD": 40.0
+        },
+        {
+            "ServiceName": "Amazon API Gateway",
+            "UsageDescription": "Public entry point for video upload and job status APIs",
+            "RequestsPerMonth": 200000,
+            "CostPerMonthUSD": 5.5
+        },
+        {
+            "ServiceName": "Amazon CloudWatch",
+            "UsageDescription": "Monitoring, logging, and alerts for EC2, Lambda, ECS, and RDS",
+            "Metrics": 500,
+            "LogsGB": 10,
+            "CostPerMonthUSD": 6.0
+        }
+    ],
+    "TotalMonthlyCostUSD": 241.4,
+    "Region": "ap-southeast-1 (Singapore)",
+    "ConcurrentUsers": 50,
+    "Notes": "Estimate created for 50 concurrent users for Video Transcoder App using AWS EC2, Lambda, ECS, RDS, S3, CloudFront, and API Gateway."
+}
