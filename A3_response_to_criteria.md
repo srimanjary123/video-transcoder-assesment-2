@@ -49,10 +49,10 @@
 
 ## Project Core - Load distribution
 
-- **Load distribution mechanism:** [eg. SQS, ALB,...]
-- **Mechanism instance name:** [eg. n1234567-project-alb]
+- **Load distribution mechanism:SQS
+- **Mechanism instance name:n11632968-video
 - **Video timestamp:**
-- **Relevant files:**
+- **Relevant files: worker1.py
     -
 
 
